@@ -1,20 +1,24 @@
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.scene.Scene;
-import javafx.scene.canvas.Canvas;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
+
 
 
 public class CrawlGui extends javafx.application.Application{
 
-    String mapToLoad;
+    Parameters mapToLoad;
+    Cartographer mapDrawing;
 
     public void start(Stage stage){
         //Sets main window
         stage.setTitle("Crawl - Explore");
+        this.mapToLoad =  getParameters();
 
         //Button layout
         Button northButton = new Button("North");
@@ -52,8 +56,23 @@ public class CrawlGui extends javafx.application.Application{
         TextArea mainText = new TextArea();
         mainText.setEditable(false);
 
-        //Sets map Canvas
-        Canvas mapCanvas = new Canvas();
+        Button exitButton = new Button("ok");
+        exitButton.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent event) {
+                stage.close();
+            }
+        });
+
+        //Makes A Cartographer
+        Object[] mapToDraw = mapToLoad.getRaw().toArray();
+        if ((String)mapToDraw[0] instanceof String){
+             this.mapDrawing = new Cartographer((String) mapToDraw[0]);
+        }
+        if (mapToDraw.length == 0 ){
+            Alert error1 = new Alert(Alert.AlertType.ERROR(),
+                    "Usage: java Crawl Gui mapname", exitButton);
+        }
+
 
 
         //Sets up main container to hold all the different components in.
@@ -61,12 +80,14 @@ public class CrawlGui extends javafx.application.Application{
         mainPane.setRight(buttonPane);
         mainPane.setBottom(mainText);
         mainPane.bottomProperty();
-        mainPane.setLeft(mapCanvas);
+        mainPane.setLeft(mapDrawing);
 
         Scene mainScene = new Scene(mainPane);
         stage.setScene(mainScene);
         stage.show();
 
     }
+
+
 
 }
