@@ -25,7 +25,29 @@ public class Cartographer extends javafx.scene.canvas.Canvas {
 
     private void drawRoom(GraphicsContext graphic){
         for (Map.Entry<Room, Pair> rooms: this.mapBounds.coords.entrySet()){
-            graphic.fillRect(rooms.getValue().x, rooms.getValue().y,10,10);
+            graphic.rect(rooms.getValue().x, rooms.getValue().y,10,10);
+            int xCo = rooms.getValue().x;
+            int yCo = rooms.getValue().y;
+            for (String exit: rooms.getKey().getExits().keySet()){
+                switch (exit){
+                    case ("North"):
+                        graphic.strokeLine(xCo+5,
+                                yCo-2, xCo+5 , yCo+2);
+                        break;
+                    case ("South"):
+                        graphic.strokeLine(xCo+5,
+                                yCo+8, xCo+5 , yCo+12);
+                        break;
+                    case ("East"):
+                        graphic.strokeLine(xCo+8,
+                                yCo+5, xCo+12 , yCo+5);
+                        break;
+                    case ("West"):
+                        graphic.strokeLine(xCo-2,
+                                yCo+5, xCo+2 , yCo+5);
+                        break;
+                }
+            }
         }
     }
 
