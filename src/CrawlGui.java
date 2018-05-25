@@ -1,13 +1,17 @@
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
+import java.awt.*;
 
 
 public class CrawlGui extends javafx.application.Application{
@@ -18,6 +22,7 @@ public class CrawlGui extends javafx.application.Application{
     public void start(Stage stage){
         //Sets main window
         stage.setTitle("Crawl - Explore");
+        //ToDO: Change back to getParameters()
         this.mapToLoad =  getParameters();
 
         //Button layout
@@ -56,22 +61,18 @@ public class CrawlGui extends javafx.application.Application{
         TextArea mainText = new TextArea();
         mainText.setEditable(false);
 
-        Button exitButton = new Button("ok");
-        exitButton.setOnAction(new EventHandler<ActionEvent>() {
-            public void handle(ActionEvent event) {
-                stage.close();
-            }
-        });
-
         //Makes A Cartographer
+        BorderPane mapPane = new BorderPane();
+        Canvas mapDrawing = new Canvas(500,500);
+        mapPane.setCenter(mapDrawing);
+
+
         Object[] mapToDraw = mapToLoad.getRaw().toArray();
-        if ((String)mapToDraw[0] instanceof String){
-             this.mapDrawing = new Cartographer((String) mapToDraw[0]);
-        }
         if (mapToDraw.length == 0 ){
-            Alert error1 = new Alert(Alert.AlertType.ERROR(),
-                    "Usage: java Crawl Gui mapname", exitButton);
+            System.err.println("Usage: java CrawlGui mapname");
+            System.exit(1);
         }
+        this.mapDrawing = new Cartographer((String) mapToDraw[0],mapDrawing);
 
 
 
@@ -80,7 +81,7 @@ public class CrawlGui extends javafx.application.Application{
         mainPane.setRight(buttonPane);
         mainPane.setBottom(mainText);
         mainPane.bottomProperty();
-        mainPane.setLeft(mapDrawing);
+        mainPane.setLeft(mapPane);
 
         Scene mainScene = new Scene(mainPane);
         stage.setScene(mainScene);
@@ -88,6 +89,8 @@ public class CrawlGui extends javafx.application.Application{
 
     }
 
-
+public static void main(String[] args){
+        launch(args);
+}
 
 }

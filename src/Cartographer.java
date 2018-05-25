@@ -1,54 +1,119 @@
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import java.util.Map;
+
+import java.util.*;
 
 public class Cartographer extends javafx.scene.canvas.Canvas {
     private Object[] loadInformation;
     public Player player;
-    BoundsMapper mapBounds;
+    private BoundsMapper mapBounds;
     public Room startRoom;
+    Canvas mapDrawing;
 
-    public Cartographer(String map){
-        loadInformation[2] = MapIO.loadMap(map);
+    //Sets up Drawing
+    private double dotX;
+    private double dotY;
+
+    public Cartographer(String map, Canvas canvas){
+        this.loadInformation = MapIO.loadMap(map);
+        this.mapDrawing = canvas;
+        if (this.loadInformation.equals(null)){
+            System.err.println("Unable to Load file");
+            System.exit(2);
+        }
         this.player = (Player) loadInformation[0];
         this.startRoom = (Room) loadInformation[1];
-
+        drawRooms();
     }
 
     public void drawRooms(){
-        Canvas mapDrawing = new Canvas();
         GraphicsContext graphic = mapDrawing.getGraphicsContext2D();
         this.mapBounds = new BoundsMapper(startRoom);
         this.mapBounds.walk();
+        for(Pair i: this.mapBounds.coords.values()){
+            System.out.println(i.x+","+i.y);
+        }
+
         drawRoom(graphic);
     }
-
     private void drawRoom(GraphicsContext graphic){
-        for (Map.Entry<Room, Pair> rooms: this.mapBounds.coords.entrySet()){
-            graphic.rect(rooms.getValue().x, rooms.getValue().y,10,10);
-            int xCo = rooms.getValue().x;
-            int yCo = rooms.getValue().y;
-            for (String exit: rooms.getKey().getExits().keySet()){
-                switch (exit){
-                    case ("North"):
-                        graphic.strokeLine(xCo+5,
-                                yCo-2, xCo+5 , yCo+2);
-                        break;
-                    case ("South"):
-                        graphic.strokeLine(xCo+5,
-                                yCo+8, xCo+5 , yCo+12);
-                        break;
-                    case ("East"):
-                        graphic.strokeLine(xCo+8,
-                                yCo+5, xCo+12 , yCo+5);
-                        break;
-                    case ("West"):
-                        graphic.strokeLine(xCo-2,
-                                yCo+5, xCo+2 , yCo+5);
-                        break;
-                }
+        this.dotX = this.mapDrawing.getWidth()/2;
+        this.dotY = this.mapDrawing.getHeight()/2;
+        for (Pair coords: this.mapBounds.coords.values()) {
+            if (coords.x == 0 && coords.y == 0){
+                graphic.strokeRect(this.dotX, this.dotY, 50,50);
+            }
+            else {
+                graphic.strokeRect(this.dotX + coords.x*50,
+                        this.dotY +coords.y*50, 50,50);
             }
         }
+//        graphic.strokeRect(dotX,dotY,50,50);
+//        for (String room: this.startRoom.getExits().keySet()){
+//            if (room.equals("North")){
+//                graphic.strokeLine(this.dotX+25, this.dotY-10,
+//                        this.dotX+25, this.dotY+10);
+//            }
+//            if (room.equals("South")){
+//                graphic.strokeLine(this.dotX+25, this.dotY+40,
+//                        this.dotX+25, this.dotY+60);
+//            }
+//            if (room.equals("East")){
+//                graphic.strokeLine(this.dotX+40, this.dotY+25,
+//                        this.dotX+60, dotY+25);
+//            }
+//            if (room.equals("West")){
+//                graphic.strokeLine(this.dotX-10, this.dotY+25,
+//                        this.dotX+10, this.dotY+25);
+//            }
+//        }
+//        walkDrawer(graphic);
     }
+
+//    public void walkDrawer(GraphicsContext graphic) {
+//        boolean northToggle = false;
+//        boolean southToogle = false;
+//        boolean eastToggle = false;
+//        boolean westToogle = false;
+//
+//        Deque<Room> toDraw = new LinkedList<Room>();
+//        Set<Room> drawnRooms = new HashSet<Room>();
+//        toDraw.add(this.startRoom);
+//        while (! toDraw.isEmpty()) {
+//            Room r = toDraw.removeFirst();
+//            if (!drawnRooms.contains(r)) {
+//                drawnRooms.add(r);
+//                for (Room e : r.getExits().values()) {
+//                    toDraw.add(e);
+//                }
+//                for (String p: r.getExits().keySet()){
+//                    if (p.equals("North")){
+//                        graphic.strokeRect(this.dotX,this.dotY-50,
+//                                50,50);
+//
+//                    }
+//                    if (p.equals("South")){
+//                        graphic.strokeRect(this.dotX,this.dotY+50,
+//                                50,50);
+//
+//                    }
+//                    if (p.equals("East")){
+//                        graphic.strokeRect(this.dotX+50,this.dotY,
+//                                50,50);
+//
+//                    }
+//                    if (p.equals("West")){
+//                        graphic.strokeRect(this.dotX-50,this.dotY,
+//                                50,50);
+//
+//                    }
+//                }
+//
+//                drawnRooms.add(r);
+//                System.out.println(r.getExits().keySet());
+//            }
+//        }
+//    }
+
 
 }
