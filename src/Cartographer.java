@@ -5,14 +5,15 @@ import java.util.*;
 
 public class Cartographer extends javafx.scene.canvas.Canvas {
     private Object[] loadInformation;
-    public Player player;
+    private Player player;
     private BoundsMapper mapBounds;
-    public Room startRoom;
-    Canvas mapDrawing;
+    private Room startRoom;
+    private Canvas mapDrawing;
 
     //Sets up Drawing
     private double dotX;
     private double dotY;
+    private float squareSize = 50;
 
     public Cartographer(String map, Canvas canvas){
         this.loadInformation = MapIO.loadMap(map);
@@ -23,13 +24,15 @@ public class Cartographer extends javafx.scene.canvas.Canvas {
         }
         this.player = (Player) loadInformation[0];
         this.startRoom = (Room) loadInformation[1];
+        this.startRoom.enter(this.player);
+        this.mapBounds = new BoundsMapper(startRoom);
+        this.mapBounds.walk();
+
         drawRooms();
     }
 
     public void drawRooms(){
         GraphicsContext graphic = mapDrawing.getGraphicsContext2D();
-        this.mapBounds = new BoundsMapper(startRoom);
-        this.mapBounds.walk();
         for(Pair i: this.mapBounds.coords.values()){
             System.out.println(i.x+","+i.y);
         }
@@ -41,79 +44,127 @@ public class Cartographer extends javafx.scene.canvas.Canvas {
         this.dotY = this.mapDrawing.getHeight()/2;
         for (Pair coords: this.mapBounds.coords.values()) {
             if (coords.x == 0 && coords.y == 0){
-                graphic.strokeRect(this.dotX, this.dotY, 50,50);
+                graphic.strokeRect(this.dotX, this.dotY, this.squareSize,
+                        this.squareSize);
             }
             else {
-                graphic.strokeRect(this.dotX + coords.x*50,
-                        this.dotY +coords.y*50, 50,50);
+                graphic.strokeRect(this.dotX + coords.x*this.squareSize,
+                        this.dotY +coords.y*this.squareSize, this.squareSize,
+                        this.squareSize);
             }
         }
-//        graphic.strokeRect(dotX,dotY,50,50);
-//        for (String room: this.startRoom.getExits().keySet()){
-//            if (room.equals("North")){
-//                graphic.strokeLine(this.dotX+25, this.dotY-10,
-//                        this.dotX+25, this.dotY+10);
-//            }
-//            if (room.equals("South")){
-//                graphic.strokeLine(this.dotX+25, this.dotY+40,
-//                        this.dotX+25, this.dotY+60);
-//            }
-//            if (room.equals("East")){
-//                graphic.strokeLine(this.dotX+40, this.dotY+25,
-//                        this.dotX+60, dotY+25);
-//            }
-//            if (room.equals("West")){
-//                graphic.strokeLine(this.dotX-10, this.dotY+25,
-//                        this.dotX+10, this.dotY+25);
-//            }
-//        }
-//        walkDrawer(graphic);
+        for (Map.Entry<Room, Pair> mappedMap: this.mapBounds.coords.entrySet()){
+            for(String exit: mappedMap.getKey().getExits().keySet()){
+               this.roomDeatailsDrawer(exit, mappedMap.getKey(),
+                       mappedMap.getValue(), graphic);
+            }
+        }
     }
 
-//    public void walkDrawer(GraphicsContext graphic) {
-//        boolean northToggle = false;
-//        boolean southToogle = false;
-//        boolean eastToggle = false;
-//        boolean westToogle = false;
-//
-//        Deque<Room> toDraw = new LinkedList<Room>();
-//        Set<Room> drawnRooms = new HashSet<Room>();
-//        toDraw.add(this.startRoom);
-//        while (! toDraw.isEmpty()) {
-//            Room r = toDraw.removeFirst();
-//            if (!drawnRooms.contains(r)) {
-//                drawnRooms.add(r);
-//                for (Room e : r.getExits().values()) {
-//                    toDraw.add(e);
-//                }
-//                for (String p: r.getExits().keySet()){
-//                    if (p.equals("North")){
-//                        graphic.strokeRect(this.dotX,this.dotY-50,
-//                                50,50);
-//
-//                    }
-//                    if (p.equals("South")){
-//                        graphic.strokeRect(this.dotX,this.dotY+50,
-//                                50,50);
-//
-//                    }
-//                    if (p.equals("East")){
-//                        graphic.strokeRect(this.dotX+50,this.dotY,
-//                                50,50);
-//
-//                    }
-//                    if (p.equals("West")){
-//                        graphic.strokeRect(this.dotX-50,this.dotY,
-//                                50,50);
-//
-//                    }
-//                }
-//
-//                drawnRooms.add(r);
-//                System.out.println(r.getExits().keySet());
-//            }
-//        }
-//    }
+    private void roomDeatailsDrawer(String exit, Room room, Pair coOrdinates,
+                            GraphicsContext graphic){
+        //Checks for origin as it is a special case
+        if (coOrdinates.x == 0 && coOrdinates.y == 0){
+            for (Thing thing: room.getContents()){
+                if (thing instanceof Explorer){
+                    graphic.strokeText("@", this.dotX +
+                            (this.squareSize*0.20), this.dotY +
+                            (this.squareSize*0.20));
+                }
+                if (thing instanceof Treasure){
+                    graphic.strokeText("$", this.dotX +
+                            (this.squareSize*0.75), this.dotY +
+                            (this.squareSize*0.20));
+                }
+                if (thing instanceof Critter){
+                    if (((Critter) thing).isAlive()){
+                        graphic.strokeText("M", this.dotX +
+                                (this.squareSize*0.20), this.dotY +
+                                (this.squareSize*0.75));
+                    }
+                    else{
+                        graphic.strokeText("m", this.dotX +
+                                (this.squareSize*0.75), this.dotY +
+                                (this.squareSize*0.75));
+                    }
+                }
+            }
+            if (exit.equals("North")){
+                graphic.strokeLine(this.dotX+(this.squareSize/2),this.dotY-5,
+                        this.dotX+(this.squareSize/2),this.dotY+5);
+            }
+            if (exit.equals("South")){
+                graphic.strokeLine(this.dotX+(this.squareSize/2),this.dotY+45,
+                        this.dotX+(this.squareSize/2),this.dotY+55);
+            }
+            if (exit.equals("East")){
+                graphic.strokeLine(this.dotX+45,this.dotY+(this.squareSize/2),
+                        this.dotX+55,this.dotY+(this.squareSize/2));
+            }
+            if (exit.equals("West")){
+                graphic.strokeLine(this.dotX-5,this.dotY+(this.squareSize/2),
+                        this.dotX+5,this.dotY+(this.squareSize/2));
+            }
+        }
+        else{
+            for (Thing thing: room.getContents()){
+                if (thing instanceof Explorer){
+                    graphic.strokeText("@",
+                            (this.dotX + coOrdinates.x*this.squareSize) +
+                            (this.squareSize*0.20),
+                            (this.dotY +coOrdinates.y*this.squareSize) +
+                            (this.squareSize*0.25));
+                }
+                if (thing instanceof Treasure){
+                    graphic.strokeText("$",
+                            (this.dotX + coOrdinates.x*this.squareSize) +
+                            (this.squareSize*0.75),
+                            (this.dotY +coOrdinates.y*this.squareSize) +
+                            (this.squareSize*0.20));
+                }
+                if (thing instanceof Critter){
+                    if (((Critter) thing).isAlive()){
+                        graphic.strokeText("M",
+                                (this.dotX + coOrdinates.x*this.squareSize) +
+                                (this.squareSize*0.15),
+                                (this.dotY +coOrdinates.y*this.squareSize) +
+                                (this.squareSize*0.75));
+                    }
+                    else{
+                        graphic.strokeText("m",
+                                (this.dotX + coOrdinates.x*this.squareSize) +
+                                (this.squareSize*0.75),
+                                (this.dotY +coOrdinates.y*this.squareSize) +
+                                (this.squareSize*0.75));
+                    }
+                }
+            }
+            if (exit.equals("North")){
+                graphic.strokeLine((this.dotX + coOrdinates.x*this.squareSize)+(this.squareSize/2),
+                        (this.dotY +coOrdinates.y*this.squareSize)-5,
+                        (this.dotX + coOrdinates.x*this.squareSize)+(this.squareSize/2),
+                        (this.dotY +coOrdinates.y*this.squareSize)+5);
+            }
+            if (exit.equals("South")){
+                graphic.strokeLine((this.dotX + coOrdinates.x*this.squareSize)+(this.squareSize/2),
+                        (this.dotY +coOrdinates.y*this.squareSize)+45,
+                        (this.dotX + coOrdinates.x*this.squareSize)+(this.squareSize/2),
+                        (this.dotY +coOrdinates.y*this.squareSize)+55);
+            }
+            if (exit.equals("East")){
+                graphic.strokeLine((this.dotX + coOrdinates.x*this.squareSize)+45,
+                        (this.dotY +coOrdinates.y*this.squareSize)+(this.squareSize/2),
+                        (this.dotX + coOrdinates.x*this.squareSize)+55,
+                        (this.dotY +coOrdinates.y*this.squareSize)+(this.squareSize/2));
+            }
+            if (exit.equals("West")){
+                graphic.strokeLine((this.dotX + coOrdinates.x*this.squareSize)-5,
+                        (this.dotY +coOrdinates.y*this.squareSize)+(this.squareSize/2),
+                        (this.dotX + coOrdinates.x*this.squareSize)+5,
+                        (this.dotY +coOrdinates.y*this.squareSize)+(this.squareSize/2));
+            }
+        }
+    }
 
 
 }
