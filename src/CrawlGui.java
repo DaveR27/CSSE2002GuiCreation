@@ -1,28 +1,24 @@
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
-import java.awt.*;
+import java.util.Map;
 
 
 public class CrawlGui extends javafx.application.Application{
 
     Parameters mapToLoad;
     Cartographer mapDrawing;
+    Map<Room, Pair> map;
 
     public void start(Stage stage){
         //Sets main window
         stage.setTitle("Crawl - Explore");
-        //ToDO: Change back to getParameters()
         this.mapToLoad =  getParameters();
 
         //Button layout
@@ -74,8 +70,6 @@ public class CrawlGui extends javafx.application.Application{
         }
         this.mapDrawing = new Cartographer((String) mapToDraw[0],mapDrawing);
 
-
-
         //Sets up main container to hold all the different components in.
         BorderPane mainPane = new BorderPane();
         mainPane.setRight(buttonPane);
@@ -83,10 +77,49 @@ public class CrawlGui extends javafx.application.Application{
         mainPane.bottomProperty();
         mainPane.setLeft(mapPane);
 
+        this.map = this.mapDrawing.getMap();
+        northButton.setOnAction((northEvent) ->
+                this.moveExplorer("North"));
+        southButton.setOnAction((northEvent) ->
+                this.moveExplorer("South"));
+        eastButton.setOnAction((northEvent) ->
+                this.moveExplorer("East"));
+        westButton.setOnAction((northEvent) ->
+                this.moveExplorer("West"));
+
         Scene mainScene = new Scene(mainPane);
         stage.setScene(mainScene);
         stage.show();
 
+    }
+
+    private void moveExplorer(String leavingFrom){
+        Room playerRoom = null;
+        Explorer player = null;
+        Boolean canExit = false;
+        Room nextRoom = null;
+        for (Room rooms: this.map.keySet()){
+            for (Thing things: rooms.getContents()){
+                if (things instanceof Explorer){
+                    playerRoom = rooms;
+                    player = (Explorer) things;
+                }
+            }
+        }
+        if (playerRoom != null){
+            for (Map.Entry<String, Room> exit:
+                    playerRoom.getExits().entrySet()){
+                if (exit.getKey().equals(leavingFrom)){
+                    canExit = true;
+                    nextRoom = exit.getValue();
+                }
+            }
+        }
+        if (canExit == true && player != null && nextRoom != null){
+            playerRoom.leave(player);
+            nextRoom.enter(player);
+            this.mapDrawing.drawRoom();
+        }
     }
 
 public static void main(String[] args){

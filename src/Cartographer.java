@@ -10,6 +10,8 @@ public class Cartographer extends javafx.scene.canvas.Canvas {
     private Room startRoom;
     private Canvas mapDrawing;
 
+    private GraphicsContext graphic;
+
     //Sets up Drawing
     private double dotX;
     private double dotY;
@@ -18,6 +20,7 @@ public class Cartographer extends javafx.scene.canvas.Canvas {
     public Cartographer(String map, Canvas canvas){
         this.loadInformation = MapIO.loadMap(map);
         this.mapDrawing = canvas;
+        this.graphic = this.mapDrawing.getGraphicsContext2D();
         if (this.loadInformation.equals(null)){
             System.err.println("Unable to Load file");
             System.exit(2);
@@ -28,18 +31,15 @@ public class Cartographer extends javafx.scene.canvas.Canvas {
         this.mapBounds = new BoundsMapper(startRoom);
         this.mapBounds.walk();
 
-        drawRooms();
+        drawRoom();
     }
 
-    public void drawRooms(){
-        GraphicsContext graphic = mapDrawing.getGraphicsContext2D();
-        for(Pair i: this.mapBounds.coords.values()){
-            System.out.println(i.x+","+i.y);
-        }
 
-        drawRoom(graphic);
+    public Map<Room, Pair> getMap(){
+        return this.mapBounds.coords;
     }
-    private void drawRoom(GraphicsContext graphic){
+
+    public void drawRoom(){
         this.dotX = this.mapDrawing.getWidth()/2;
         this.dotY = this.mapDrawing.getHeight()/2;
         for (Pair coords: this.mapBounds.coords.values()) {
@@ -55,14 +55,13 @@ public class Cartographer extends javafx.scene.canvas.Canvas {
         }
         for (Map.Entry<Room, Pair> mappedMap: this.mapBounds.coords.entrySet()){
             for(String exit: mappedMap.getKey().getExits().keySet()){
-               this.roomDeatailsDrawer(exit, mappedMap.getKey(),
-                       mappedMap.getValue(), graphic);
+               this.roomDetailsDrawer(exit, mappedMap.getKey(),
+                       mappedMap.getValue());
             }
         }
     }
 
-    private void roomDeatailsDrawer(String exit, Room room, Pair coOrdinates,
-                            GraphicsContext graphic){
+    private void roomDetailsDrawer(String exit, Room room, Pair coOrdinates){
         //Checks for origin as it is a special case
         if (coOrdinates.x == 0 && coOrdinates.y == 0){
             for (Thing thing: room.getContents()){
