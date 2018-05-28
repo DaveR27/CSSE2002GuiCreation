@@ -34,6 +34,15 @@ public class Cartographer extends javafx.scene.canvas.Canvas {
         drawRoom();
     }
 
+    public Room getStartRoom(){
+        return this.startRoom;
+    }
+
+    public void cleanCanvas(){
+        this.graphic.clearRect(0,0, this.mapDrawing.getWidth(),
+                this.mapDrawing.getHeight());
+    }
+
 
     public Map<Room, Pair> getMap(){
         return this.mapBounds.coords;
