@@ -62,6 +62,7 @@ public class Cartographer extends javafx.scene.canvas.Canvas {
                         this.squareSize);
             }
         }
+
         for (Map.Entry<Room, Pair> mappedMap: this.mapBounds.coords.entrySet()){
             for(String exit: mappedMap.getKey().getExits().keySet()){
                this.roomDetailsDrawer(exit, mappedMap.getKey(),
