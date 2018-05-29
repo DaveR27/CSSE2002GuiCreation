@@ -301,6 +301,11 @@ public class CrawlGui extends javafx.application.Application{
         this.mainText.positionCaret(this.mainText.getLength());
     }
 
+    /**
+     * Method that is called when the drop button is pressed by the user in the
+     * game. When pressed it will open a dialog box that will take String
+     * input from the user. This input is then passed to the drop() method.
+     */
     private void dropButtonAction(){
         Room playerRoom;
         Explorer player;
@@ -319,9 +324,23 @@ public class CrawlGui extends javafx.application.Application{
         }
     }
 
+    /**
+     * Checks to see if the user String is the same as the short description of
+     * anything within the player's inventory. If it is in the inventory it is
+     * then removed and placed within the players current room. The map is then
+     * redrawn to display that the item is not in that room. If the item that
+     * the user searches for is not within the player's inventory the textfield
+     * in the main window has "Nothing found with that name" added to the
+     * display.
+     *
+     * @param textBox String user input passed in by dropActionButton
+     * @param currentRoom the current location of the explorer object
+     * @param player the explorer object within the game
+     */
     private void drop(String textBox, Room currentRoom, Explorer player){
         Boolean found = false;
         for(Thing things: player.getContents()){
+            // caparison between thing descriptions and user input.
             if (things.getShortDescription().equals(textBox)){
                 player.drop(things);
                 currentRoom.enter(things);
@@ -330,12 +349,19 @@ public class CrawlGui extends javafx.application.Application{
                 found = true;
             }
         }
+        // happens when input and thing description doesn't match.
         if(!found){
             this.mainText.setText(this.mainText.getText() + "\n" + "Nothing " +
                     "found with that name");
         }
     }
 
+    /**
+     * Method that is called when the examine button is pressed within the
+     * game. When it is pressed a TextInputDialog is displayed, and gets String
+     * input from the user. This string is then passed to the examine find
+     * method.
+     */
     private void examine(){
         Room playerRoom;
         Explorer player;
@@ -355,9 +381,22 @@ public class CrawlGui extends javafx.application.Application{
         }
     }
 
+    /**
+     * First looks in the explorers inventory to see if the user input matches
+     * what the anything that the explorer is holding. If nothing is found the
+     * current room is then checked. If the short description of any Thing
+     * matches the users String the longDescription of that object is then
+     * displayed in the text field within the game. If nothing is found within
+     * at all "Nothing found with that name" is then displayed.
+     *
+     * @param item The item that the user wants to examine.
+     * @param currentRoom The current room that the player is in.
+     * @param player the explorer object that is being controlled by the user.
+     */
     private void examineFind(String item, Room currentRoom, Explorer player){
         Boolean notInInv = true;
         Boolean notInRoom = true;
+        //Checks the player inventory
         for (Thing things: player.getContents()){
             if (things.getShort().equals(item)){
                 this.mainText.setText(this.mainText.getText() + "\n" +
@@ -365,6 +404,7 @@ public class CrawlGui extends javafx.application.Application{
                 notInInv = false;
             }
         }
+        //checks the current room
         if (notInInv){
             for (Thing thing: currentRoom.getContents()){
                 if (thing.getShort().equals(item)){
@@ -374,6 +414,7 @@ public class CrawlGui extends javafx.application.Application{
                 }
             }
         }
+        //If there is no matches
         if (notInInv && notInRoom){
             this.mainText.setText(this.mainText.getText() + "\n" +
                     "Nothing found with that name");
@@ -382,9 +423,14 @@ public class CrawlGui extends javafx.application.Application{
     }
 
     /**
-     * Looks in current player room and displays the room name and
-     * contents of the room. It then displays what the player is carrying
-     * and how much everything the player is carrying is worth.
+     * The method that is called when the Look button is pressed within the
+     * game. When pressed all the following information is displayed within
+     * the text field in the same order:
+     * "player current room "- you see:"
+     *   Thing Objects in current room
+     *  "You are carrying:"
+     *    Everything in explorers inventory
+     *  "worth" total value of explorer inventory "in total" "
      */
     private void lookInRoom(){
         Room playerRoom;
@@ -394,12 +440,14 @@ public class CrawlGui extends javafx.application.Application{
         if (findPlayer() != null){
             playerRoom = (Room) findPlayer()[0];
             player = (Explorer) findPlayer()[1];
+            //displays what is in current room
             this.mainText.setText(mainText.getText() + "\n" +
             playerRoom.getDescription() + " " + "- you see:");
             for (Thing things: playerRoom.getContents()){
                 this.mainText.setText(this.mainText.getText() + "\n"+
                 " " + things.getShort());
             }
+            //displays everything in explorers inventory
             this.mainText.setText(this.mainText.getText() + "\n" +
             "You are carrying:");
             for (Thing thing: player.getContents()){
@@ -410,6 +458,7 @@ public class CrawlGui extends javafx.application.Application{
                 this.mainText.setText(this.mainText.getText() + "\n"
                 + " " + thing.getShort());
             }
+            //total worth of the players inventory
             this.mainText.setText(this.mainText.getText() + "\n" +
             "worth " + String.valueOf(playerInvWorth) + " in total");
         }
@@ -417,7 +466,16 @@ public class CrawlGui extends javafx.application.Application{
     }
 
     /**
-     * Moves the explorer object through Available exits
+     * Directional controller for the Explorer. This method is called for
+     * all the directional buttons but dependant on what one is pressed the
+     * parameter change, for example the North button passes in "North" to
+     * the method. This method checks for exits from each room to see where
+     * the explorer can go. If there is not exit in the direction the user wants
+     * to go then "No door that way" is displayed to the textfield
+     * It also checks to see if there is a critter within
+     * any given room, if so "Something is preventing you from leaving is
+     * displayed within the game". Each time this method is called the canvas
+     * is wiped and redrawn with everything in the new positions.
      *
      * @param leavingFrom Which exit to leave from
      */
@@ -431,6 +489,7 @@ public class CrawlGui extends javafx.application.Application{
             playerRoom = (Room) findPlayer()[0];
             player = (Explorer) findPlayer()[1];
             if (playerRoom != null) {
+                //checks to see if it is possible to leave through this  exit.
                 for (Map.Entry<String, Room> exit :
                         playerRoom.getExits().entrySet()) {
                     if (exit.getKey().equals(leavingFrom)) {
@@ -438,16 +497,23 @@ public class CrawlGui extends javafx.application.Application{
                         nextRoom = exit.getValue();
                     }
                 }
+                //If there is no exit that way
                 if (canExit != true){
                     this.mainText.setText(this.mainText.getText() + "\n" +
                             "No door that way");
                 }
             }
+            //Checks if there is critters within any given room.
             for (Thing things: playerRoom.getContents()){
                 if (things instanceof Critter){
                     critterFight = (Critter) things;
                 }
             }
+            /*
+            if a critter is found it checks to see if it wants to fight the
+            explorer if yes then player is stopped from leaving a message is
+            displayed
+             */
             if (critterFight != null){
                 if (critterFight.wantsToFight(player) &&
                         critterFight.isAlive()) {
@@ -455,6 +521,10 @@ public class CrawlGui extends javafx.application.Application{
                             "Something prevents you from leaving");
                 }
             }
+            /*
+            If not critter wants to fight and there is a valid exit the explorer
+            is then moved to the target room and the map is redrawn.
+             */
             if (critterFight == null){
                 if (canExit == true && player != null && nextRoom != null) {
                     playerRoom.leave(player);
