@@ -185,10 +185,10 @@ public class CrawlGui extends javafx.application.Application{
      * Will search the contents of the room that the player is currently in and
      * will skip over any explorer objects in the search, but if the String
      * entered in by the user matches the short description of the a Thing in
-     * that room it will check to see if it is a critter. If the thing is a
-     * critter it will be checked to see if its alive, if it is alive the method
-     * fails silently if it is dead it will be taken from the room and added
-     * to the explorers inventory. If the thing isn't a critter is will
+     * that room, it will check to see if it is a critter. If the thing is a
+     * critter it will be checked to see if it's alive, if it is alive the
+     * method fails silently if it is dead it will be taken from the room and
+     * added to the explorers inventory. If the thing isn't a critter is will
      * instantly be taken from the room and added to players inventory.
      *
      * @param textBox input into the dialog box by the user.
@@ -200,7 +200,8 @@ public class CrawlGui extends javafx.application.Application{
             if (!(thing instanceof Explorer)){ // skipping explorer
                 if (thing.getShortDescription().equals(textBox)){
                     if (thing instanceof Critter){
-                        /*checks to see if critter is alive then fails silently
+                        /*
+                        checks to see if critter is alive then fails silently
                         if it is
                          */
                         if (!((Critter) thing).isAlive()){
@@ -220,9 +221,18 @@ public class CrawlGui extends javafx.application.Application{
                 }
             }
         }
+        /*
+        puts the scrolling display at the bottom on the game to the most
+        recent output.
+         */
         this.mainText.positionCaret(this.mainText.getLength());
     }
 
+    /**
+     * Method that is called when the fight button is pressed in the game by
+     * the user. This function sets up a dialog box that takes input, that
+     * input is then pasted to fighting.
+     */
     private void fightButtonAction(){
         Room playerRoom;
         Explorer player;
@@ -241,18 +251,33 @@ public class CrawlGui extends javafx.application.Application{
         }
     }
 
+    /**
+     * Checks for a critter in the room with the same short description as the
+     * user input in textBox. If there is a match then the player object will
+     * fight the critter. If the player wins and is still alive "You won" is
+     * printed to the game the the critter will now be able to be looted. If
+     * the explorer loses the fight and dies then all the buttons on the game
+     * are disabled and "Game over" is printed to the TextField within the game.
+     *
+     * @param textBox String that the user gives.
+     * @param currentRoom the room that the explorer object is currently in.
+     * @param player Explorer object that the user controls.
+     */
     private void fighting(String textBox, Room currentRoom, Explorer player){
         for (Thing thing: currentRoom.getContents()){
             if (thing.getShortDescription().equals(textBox)){
                 if (thing instanceof Critter){
+                    //fights the critter in the room
                     player.fight((Mob) thing);
                     if(player.isAlive()){
+                        //occurs if the explorer wins the fight
                         this.mainText.setText(this.mainText.getText() + "\n" +
                         "You won");
                         this.mapDrawing.cleanCanvas();
                         this.mapDrawing.drawRoom();
                     }
                     else {
+                        //When the explorer is dead all the buttons are disabled
                         this.mainText.setText(this.mainText.getText() + "\n" +
                                 "Game Over");
                         this.northButton.setDisable(true);
@@ -269,6 +294,10 @@ public class CrawlGui extends javafx.application.Application{
                 }
             }
         }
+        /*
+        puts the scrolling display at the bottom on the game to the most
+        recent output.
+         */
         this.mainText.positionCaret(this.mainText.getLength());
     }
 
