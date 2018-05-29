@@ -38,6 +38,7 @@ public class Cartographer extends javafx.scene.canvas.Canvas {
         this.mapBounds = new BoundsMapper(startRoom);
         this.mapBounds.walk();
 
+
         drawRoom();
     }
 
@@ -253,6 +254,4 @@ public class Cartographer extends javafx.scene.canvas.Canvas {
                     this.dotX+5,this.dotY+(this.squareSize/2));
         }
     }
-
-
 }

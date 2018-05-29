@@ -70,17 +70,20 @@ public class CrawlGui extends javafx.application.Application{
         this.mainText = new TextArea();
         this.mainText.setEditable(false);
 
-        //Makes A Cartographer
-        BorderPane mapPane = new BorderPane();
-        Canvas mapDrawing = new Canvas(500,500);
-        mapPane.setCenter(mapDrawing);
-
 
         Object[] mapToDraw = mapToLoad.getRaw().toArray();
         if (mapToDraw.length == 0 ){
             System.err.println("Usage: java CrawlGui mapname");
             System.exit(1);
         }
+
+        //Makes A Cartographer
+        BorderPane mapPane = new BorderPane();
+        Canvas mapDrawing = new Canvas(500,500);
+        mapPane.setCenter(mapDrawing);
+        stage.setMinWidth(700);
+        stage.setMinHeight(700);
+
         this.mapDrawing = new Cartographer((String) mapToDraw[0],mapDrawing);
 
         //Tells you the starting room
@@ -125,6 +128,8 @@ public class CrawlGui extends javafx.application.Application{
             this.saveActionButton());
         Scene mainScene = new Scene(mainPane);
         stage.setScene(mainScene);
+//        stage.setMinHeight(700);
+//        stage.setMinWidth(700);
         stage.show();
 
     }
@@ -241,7 +246,7 @@ public class CrawlGui extends javafx.application.Application{
             playerRoom = (Room) findPlayer()[0];
             player = (Explorer) findPlayer()[1];
             TextInputDialog fightText = new TextInputDialog();
-            fightText.setTitle("Item to drop?");
+            fightText.setTitle("What to fight?");
             fightText.setGraphic(null);
             fightText.setHeaderText(null);
             Optional<String> fightMe = fightText.showAndWait();
