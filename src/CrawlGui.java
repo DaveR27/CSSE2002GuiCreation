@@ -29,6 +29,12 @@ public class CrawlGui extends javafx.application.Application{
     Button fightButton;
     Button saveButton;
 
+    /**
+     * This is a method to start the application, it will take command
+     * line arguments for what file needs to be found.
+     *
+     * @param stage The main screen for the application.
+     */
     public void start(Stage stage){
         //Sets main window
         stage.setTitle("Crawl - Explore");
@@ -128,8 +134,8 @@ public class CrawlGui extends javafx.application.Application{
             this.saveActionButton());
         Scene mainScene = new Scene(mainPane);
         stage.setScene(mainScene);
-//        stage.setMinHeight(700);
-//        stage.setMinWidth(700);
+        stage.setMinHeight(700);
+        stage.setMinWidth(700);
         stage.show();
 
     }
@@ -195,6 +201,7 @@ public class CrawlGui extends javafx.application.Application{
      * method fails silently if it is dead it will be taken from the room and
      * added to the explorers inventory. If the thing isn't a critter is will
      * instantly be taken from the room and added to players inventory.
+     * This is a helper function for the button.
      *
      * @param textBox input into the dialog box by the user.
      * @param currentRoom the current room the explorer is in.
@@ -202,18 +209,22 @@ public class CrawlGui extends javafx.application.Application{
      */
     private void take(String textBox, Room currentRoom, Explorer player){
         for (Thing thing: currentRoom.getContents()){
-            if (!(thing instanceof Explorer)){ // skipping explorer
+            // skipping explorer
+            if (thing instanceof Critter || thing instanceof  Treasure){
                 if (thing.getShortDescription().equals(textBox)){
-                    if (thing instanceof Critter){
                         /*
                         checks to see if critter is alive then fails silently
+                    if (thing instanceof Critter){
                         if it is
                          */
-                        if (!((Critter) thing).isAlive()){
-                            currentRoom.leave(thing);
-                            player.add(thing);
-                            this.mapDrawing.cleanCanvas();
-                            this.mapDrawing.drawRoom();
+                        if (thing instanceof Critter){
+                            Critter testingCritter = (Critter) thing;
+                            if (!testingCritter.wantsToFight(player)) {
+                                currentRoom.leave(thing);
+                                player.add(thing);
+                                this.mapDrawing.cleanCanvas();
+                                this.mapDrawing.drawRoom();
+                            }
                         }
                     }
                     // for when thing isn't a critter
@@ -225,7 +236,6 @@ public class CrawlGui extends javafx.application.Application{
                     }
                 }
             }
-        }
         /*
         puts the scrolling display at the bottom on the game to the most
         recent output.
@@ -263,6 +273,7 @@ public class CrawlGui extends javafx.application.Application{
      * printed to the game the the critter will now be able to be looted. If
      * the explorer loses the fight and dies then all the buttons on the game
      * are disabled and "Game over" is printed to the TextField within the game.
+     * This is a helper function for the button.
      *
      * @param textBox String that the user gives.
      * @param currentRoom the room that the explorer object is currently in.
@@ -337,6 +348,7 @@ public class CrawlGui extends javafx.application.Application{
      * the user searches for is not within the player's inventory the textfield
      * in the main window has "Nothing found with that name" added to the
      * display.
+     * This is a helper function for the button.
      *
      * @param textBox String user input passed in by dropActionButton
      * @param currentRoom the current location of the explorer object
@@ -393,6 +405,7 @@ public class CrawlGui extends javafx.application.Application{
      * matches the users String the longDescription of that object is then
      * displayed in the text field within the game. If nothing is found within
      * at all "Nothing found with that name" is then displayed.
+     * This is a helper function for the button.
      *
      * @param item The item that the user wants to examine.
      * @param currentRoom The current room that the player is in.
